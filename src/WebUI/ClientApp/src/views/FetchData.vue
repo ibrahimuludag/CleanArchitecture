@@ -77,9 +77,7 @@ export default Vue.extend({
     },
     async fetchWeatherForecasts() {
       try {
-          client.get().then((response) => {
-            this.forecasts = response
-        });
+          this.forecasts = await client.get()
       } catch (e) {
         this.showError = true
         this.errorMessage = `Error while loading weather forecast: ${e.message}.`
