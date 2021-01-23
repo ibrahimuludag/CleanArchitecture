@@ -29,9 +29,9 @@ export class ClientBase {
 export interface ITodoItemsClient {
     getTodoItemsWithPagination(listId: number | undefined, pageNumber: number | undefined, pageSize: number | undefined): Promise<PaginatedListOfTodoItemDto>;
     create(command: CreateTodoItemCommand): Promise<number>;
-    update(id: number, command: UpdateTodoItemCommand): Promise<FileResponse>;
-    delete(id: number): Promise<FileResponse>;
-    updateItemDetails(id: number | undefined, command: UpdateTodoItemDetailCommand): Promise<FileResponse>;
+    update(id: number, command: UpdateTodoItemCommand): Promise<void>;
+    delete(id: number): Promise<void>;
+    updateItemDetails(id: number | undefined, command: UpdateTodoItemDetailCommand): Promise<void>;
 }
 
 export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
@@ -146,20 +146,28 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
                 }
             }
         }
-        if (status === 200) {
+        if (status === 201) {
             const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-        } else if (status !== 200 && status !== 204) {
+            let result201: any = null;
+            let resultData201  = _responseText;
+            result201 = resultData201 !== undefined ? resultData201 : <any>null;
+            return result201;
+        } else if (status === 400) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<number>(<any>null);
     }
 
-    update(id: number, command: UpdateTodoItemCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    update(id: number, command: UpdateTodoItemCommand , cancelToken?: CancelToken | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TodoItems/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -170,12 +178,10 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
 
         let options_ = <AxiosRequestConfig>{
             data: content_,
-            responseType: "blob",
             method: "PUT",
             url: url_,
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
             },
             cancelToken
         };
@@ -193,7 +199,7 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
         });
     }
 
-    protected processUpdate(response: AxiosResponse): Promise<FileResponse> {
+    protected processUpdate(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -203,19 +209,31 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: response.data as Blob, headers: _headers });
-        } else if (status !== 200 && status !== 204) {
+        if (status === 204) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<FileResponse>(<any>null);
     }
 
-    delete(id: number , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    delete(id: number , cancelToken?: CancelToken | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TodoItems/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -223,11 +241,9 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
             method: "DELETE",
             url: url_,
             headers: {
-                "Accept": "application/octet-stream"
             },
             cancelToken
         };
@@ -245,7 +261,7 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
         });
     }
 
-    protected processDelete(response: AxiosResponse): Promise<FileResponse> {
+    protected processDelete(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -255,19 +271,34 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: response.data as Blob, headers: _headers });
-        } else if (status !== 200 && status !== 204) {
+        if (status === 200) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 204) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<FileResponse>(<any>null);
     }
 
-    updateItemDetails(id: number | undefined, command: UpdateTodoItemDetailCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    updateItemDetails(id: number | undefined, command: UpdateTodoItemDetailCommand , cancelToken?: CancelToken | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TodoItems/UpdateItemDetails?";
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
@@ -279,12 +310,10 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
 
         let options_ = <AxiosRequestConfig>{
             data: content_,
-            responseType: "blob",
             method: "PUT",
             url: url_,
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
             },
             cancelToken
         };
@@ -302,7 +331,7 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
         });
     }
 
-    protected processUpdateItemDetails(response: AxiosResponse): Promise<FileResponse> {
+    protected processUpdateItemDetails(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -312,16 +341,28 @@ export class TodoItemsClient extends ClientBase implements ITodoItemsClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: response.data as Blob, headers: _headers });
-        } else if (status !== 200 && status !== 204) {
+        if (status === 204) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<FileResponse>(<any>null);
     }
 }
 
@@ -329,8 +370,8 @@ export interface ITodoListsClient {
     get(): Promise<TodosVm>;
     create(command: CreateTodoListCommand): Promise<number>;
     get2(id: number): Promise<FileResponse>;
-    update(id: number, command: UpdateTodoListCommand): Promise<FileResponse>;
-    delete(id: number): Promise<FileResponse>;
+    update(id: number, command: UpdateTodoListCommand): Promise<void>;
+    delete(id: number): Promise<void>;
 }
 
 export class TodoListsClient extends ClientBase implements ITodoListsClient {
@@ -433,17 +474,25 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
                 }
             }
         }
-        if (status === 200) {
+        if (status === 201) {
             const _responseText = response.data;
-            let result200: any = null;
-            let resultData200  = _responseText;
-            result200 = resultData200 !== undefined ? resultData200 : <any>null;
-            return result200;
-        } else if (status !== 200 && status !== 204) {
+            let result201: any = null;
+            let resultData201  = _responseText;
+            result201 = resultData201 !== undefined ? resultData201 : <any>null;
+            return result201;
+        } else if (status === 400) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<number>(<any>null);
     }
 
     get2(id: number , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
@@ -498,7 +547,7 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
         return Promise.resolve<FileResponse>(<any>null);
     }
 
-    update(id: number, command: UpdateTodoListCommand , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    update(id: number, command: UpdateTodoListCommand , cancelToken?: CancelToken | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TodoLists/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -509,12 +558,10 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
 
         let options_ = <AxiosRequestConfig>{
             data: content_,
-            responseType: "blob",
             method: "PUT",
             url: url_,
             headers: {
                 "Content-Type": "application/json",
-                "Accept": "application/octet-stream"
             },
             cancelToken
         };
@@ -532,7 +579,7 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
         });
     }
 
-    protected processUpdate(response: AxiosResponse): Promise<FileResponse> {
+    protected processUpdate(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -542,19 +589,31 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: response.data as Blob, headers: _headers });
-        } else if (status !== 200 && status !== 204) {
+        if (status === 204) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<FileResponse>(<any>null);
     }
 
-    delete(id: number , cancelToken?: CancelToken | undefined): Promise<FileResponse> {
+    delete(id: number , cancelToken?: CancelToken | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/TodoLists/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -562,11 +621,9 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ = <AxiosRequestConfig>{
-            responseType: "blob",
             method: "DELETE",
             url: url_,
             headers: {
-                "Accept": "application/octet-stream"
             },
             cancelToken
         };
@@ -584,7 +641,7 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
         });
     }
 
-    protected processDelete(response: AxiosResponse): Promise<FileResponse> {
+    protected processDelete(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -594,16 +651,31 @@ export class TodoListsClient extends ClientBase implements ITodoListsClient {
                 }
             }
         }
-        if (status === 200 || status === 206) {
-            const contentDisposition = response.headers ? response.headers["content-disposition"] : undefined;
-            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
-            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
-            return Promise.resolve({ fileName: fileName, status: status, data: response.data as Blob, headers: _headers });
-        } else if (status !== 200 && status !== 204) {
+        if (status === 200) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 204) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(<any>null);
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<FileResponse>(<any>null);
     }
 }
 
@@ -668,11 +740,19 @@ export class WeatherForecastClient extends ClientBase implements IWeatherForecas
                     result200!.push(WeatherForecast.fromJS(item));
             }
             return result200;
-        } else if (status !== 200 && status !== 204) {
+        } else if (status === 404) {
             const _responseText = response.data;
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+        } else {
+            const _responseText = response.data;
+            let resultdefault: any = null;
+            let resultDatadefault  = _responseText;
+            resultdefault = ProblemDetails.fromJS(resultDatadefault);
+            return throwException("A server side error occurred.", status, _responseText, _headers, resultdefault);
         }
-        return Promise.resolve<WeatherForecast[]>(<any>null);
     }
 }
 
@@ -815,6 +895,81 @@ export interface ITodoItemDto {
     done?: boolean;
     priority?: number;
     note?: string | undefined;
+}
+
+export class ProblemDetails implements IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+    extensions?: { [key: string]: any; } | undefined;
+
+    constructor(data?: IProblemDetails) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.type = _data["type"];
+            this.title = _data["title"];
+            this.status = _data["status"];
+            this.detail = _data["detail"];
+            this.instance = _data["instance"];
+            if (_data["extensions"]) {
+                this.extensions = {} as any;
+                for (let key in _data["extensions"]) {
+                    if (_data["extensions"].hasOwnProperty(key))
+                        this.extensions![key] = _data["extensions"][key];
+                }
+            }
+        }
+    }
+
+    static fromJS(data: any): ProblemDetails {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProblemDetails();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["type"] = this.type;
+        data["title"] = this.title;
+        data["status"] = this.status;
+        data["detail"] = this.detail;
+        data["instance"] = this.instance;
+        if (this.extensions) {
+            data["extensions"] = {};
+            for (let key in this.extensions) {
+                if (this.extensions.hasOwnProperty(key))
+                    data["extensions"][key] = this.extensions[key];
+            }
+        }
+        return data; 
+    }
+
+    clone(): ProblemDetails {
+        const json = this.toJSON();
+        let result = new ProblemDetails();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+    extensions?: { [key: string]: any; } | undefined;
 }
 
 export class CreateTodoItemCommand implements ICreateTodoItemCommand {
