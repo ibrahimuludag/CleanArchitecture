@@ -1,7 +1,9 @@
 using CleanArchitecture.Application;
 using CleanArchitecture.Application.Common.Interfaces;
+using CleanArchitecture.Application.Common.Models;
 using CleanArchitecture.Infrastructure;
 using CleanArchitecture.Infrastructure.Persistence;
+using CleanArchitecture.WebUI.Configuration;
 using CleanArchitecture.WebUI.Filters;
 using CleanArchitecture.WebUI.Services;
 using FluentValidation.AspNetCore;
@@ -13,6 +15,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using Serilog;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Newtonsoft;
 using System.Linq;
 using VueCliMiddleware;
 
@@ -43,8 +48,10 @@ namespace CleanArchitecture.WebUI
                 .AddDbContextCheck<ApplicationDbContext>();
 
             services.AddControllersWithViews(options =>
-                options.Filters.Add<ApiExceptionFilterAttribute>())
-                    .AddFluentValidation();
+            {
+                options.ReturnHttpNotAcceptable = true;
+                options.Filters.Add<ApiExceptionFilterAttribute>();
+            }).AddFluentValidation();
 
             services.AddRazorPages();
 
@@ -72,6 +79,10 @@ namespace CleanArchitecture.WebUI
 
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
+
+            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>((options) => Configuration.GetSection("Redis").Get<RedisConfiguration>());
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,6 +102,8 @@ namespace CleanArchitecture.WebUI
                 app.UseHsts();
             }
 
+            app.UseSecurityHeaders();
+            app.UseSerilogRequestLogging();
             app.UseHealthChecks("/health");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
