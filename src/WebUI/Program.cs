@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using Serilog.Exceptions;
+using Serilog.Exceptions.Core;
+using Serilog.Exceptions.EntityFrameworkCore.Destructurers;
 using System;
 using System.Threading.Tasks;
 using VueCliMiddleware;
@@ -64,6 +69,27 @@ namespace CleanArchitecture.WebUI
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseSerilog((context, loggerConfiguration) =>
+                    {
+                        loggerConfiguration
+                            .ReadFrom.Configuration(context.Configuration)
+                            .MinimumLevel.Debug()
+                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                            .Enrich.FromLogContext()
+                            .Enrich.WithExceptionDetails(new DestructuringOptionsBuilder()
+                                .WithDefaultDestructurers()
+                                .WithDestructurers(new[] { new DbUpdateExceptionDestructurer() }))
+                            .Enrich.WithProperty("ApplicationContext", "Clean Architecture")
+                            // .WriteTo.Seq(context.Configuration["SeqUrl"]) Optional
+                            .WriteTo.Console();
+
+                        if (context.HostingEnvironment.IsDevelopment())
+                        {
+                            loggerConfiguration
+                                .MinimumLevel.Debug();
+                        }
+                    });
                 });
     }
 }
