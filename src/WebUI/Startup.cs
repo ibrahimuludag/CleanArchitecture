@@ -1,9 +1,7 @@
 using CleanArchitecture.Application;
 using CleanArchitecture.Application.Common.Interfaces;
-using CleanArchitecture.Application.Common.Models;
 using CleanArchitecture.Infrastructure;
 using CleanArchitecture.Infrastructure.Persistence;
-using CleanArchitecture.WebUI.Configuration;
 using CleanArchitecture.WebUI.Filters;
 using CleanArchitecture.WebUI.Services;
 using FluentValidation.AspNetCore;
@@ -16,8 +14,6 @@ using Microsoft.Extensions.Hosting;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Serilog;
-using StackExchange.Redis.Extensions.Core.Configuration;
-using StackExchange.Redis.Extensions.Newtonsoft;
 using System.Linq;
 using VueCliMiddleware;
 
@@ -80,7 +76,10 @@ namespace CleanArchitecture.WebUI
                 configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
-            services.AddStackExchangeRedisExtensions<NewtonsoftSerializer>((options) => Configuration.GetSection("Redis").Get<RedisConfiguration>());
+            services.AddDistributedRedisCache(option => {
+                option.Configuration = Configuration.GetConnectionString("RedisConnection");
+                option.InstanceName = "master";
+            });
 
 
         }

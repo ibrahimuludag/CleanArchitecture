@@ -1,19 +1,19 @@
 ﻿using CleanArchitecture.Infrastructure.ApiConventions;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis.Extensions.Core.Abstractions;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CleanArchitecture.WebUI.Controllers
 {
     public class CacheController : ApiControllerBase
     {
-        private readonly IRedisCacheClient _redisCacheClient;
-        public CacheController(IRedisCacheClient redisCacheClient)
+        private readonly IDistributedCache _cache;
+        public CacheController(IDistributedCache cache)
         {
-            _redisCacheClient = redisCacheClient;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -21,8 +21,18 @@ namespace CleanArchitecture.WebUI.Controllers
         [ApiConventionMethod(typeof(CleanArchitectureApiConventions), nameof(CleanArchitectureApiConventions.Get))]
         public async Task<IActionResult> GetSetCache()
         {
-            await _redisCacheClient.GetDbFromConfiguration().AddAsync<string>("myName", "naveen", DateTimeOffset.Now.AddMinutes(2));
-            return Ok(await _redisCacheClient.GetDbFromConfiguration().GetAsync<string>("myName"));
+            var cachedName = await _cache.GetStringAsync("name");
+            if (string.IsNullOrEmpty(cachedName))
+            {
+                cachedName = "Heisenberg";
+
+                DistributedCacheEntryOptions options = new DistributedCacheEntryOptions();
+                options.SetAbsoluteExpiration(new System.TimeSpan(0, 0, 15));
+
+                //and then, put them in cache
+                _cache.SetString("name", cachedName, options);
+            }
+            return Ok(cachedName);
         }
     }
 }
