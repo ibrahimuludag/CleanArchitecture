@@ -1,6 +1,13 @@
 ﻿# .Net Clean Architecture Solution
 This solution is a basic, incomplete solution demonstrating the basics of Clean Architecture. I was mainly inspired by [Json Taylor](https://github.com/jasontaylordev/CleanArchitecture) and [Gill Cleeren](https://app.pluralsight.com/library/courses/asp-dot-net-core-6-clean-architecture/table-of-contents). To use this solution, clone this repository and start coding.
 
+##### Table of Contents  
+[Headers](#headers)  
+[Emphasis](#emphasis)  
+...snip...    
+<a name="headers"/>
+## Headers
+
 # Clean Architecture
 Clean architecture is a software design philosophy that separates the elements of a design into ring levels. An essential goal of clean architecture is to provide developers with a way to organize code so that it encapsulates the business logic but keeps it separate from the delivery mechanism. 
 

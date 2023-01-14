@@ -8,7 +8,7 @@ public class CleanArchitectureWebApplicationFactory<TStartup> : WebApplicationFa
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("it");
+        builder.UseEnvironment("It");
     }
 
     public HttpClient GetClient()
