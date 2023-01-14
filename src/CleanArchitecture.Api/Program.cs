@@ -2,7 +2,7 @@ using CleanArchitecture.Api.Infrastructure;
 using CleanArchitecture.Application;
 using CleanArchitecture.Infrastructure;
 using CleanArchitecture.Infrastructure.Middlewares;
-using CleanArchitecture.Persistance;
+using CleanArchitecture.Persistence;
 using Serilog;
 using System.Text.Json.Serialization;
 

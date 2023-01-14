@@ -1,6 +1,6 @@
 ﻿using CleanArchitecture.Application.Contracts.Authorization;
 using CleanArchitecture.Infrastructure.Services;
-using CleanArchitecture.Persistance.Initialization;
+using CleanArchitecture.Persistence.Initialization;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc;

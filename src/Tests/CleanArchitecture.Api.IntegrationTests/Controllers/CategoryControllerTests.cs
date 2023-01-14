@@ -2,7 +2,7 @@
 using CleanArchitecture.Application.Features.Categories.GetCategory;
 using CleanArchitecture.Application.Features.Categories.Queries.GetCategoriesList;
 using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Persistance.Initialization.Seed;
+using CleanArchitecture.Persistence.Initialization.Seed;
 using Newtonsoft.Json;
 using Shouldly;
 using System.Net.Http.Json;

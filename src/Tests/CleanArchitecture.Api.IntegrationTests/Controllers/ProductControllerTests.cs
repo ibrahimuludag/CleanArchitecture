@@ -6,7 +6,7 @@ using CleanArchitecture.Application.Features.Products.Queries.GetProductsList;
 using CleanArchitecture.Application.Features.Products.SetProductStock;
 using CleanArchitecture.Application.Models;
 using CleanArchitecture.Domain.Entities;
-using CleanArchitecture.Persistance.Initialization.Seed;
+using CleanArchitecture.Persistence.Initialization.Seed;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
