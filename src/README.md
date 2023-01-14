@@ -193,3 +193,6 @@ This project is licensed with the  [MIT license](https://github.com/ibrahimuluda
 - [Value Objects](https://en.wikipedia.org/wiki/Value_object)
 - [Domain Events](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation)
 
+# Todo
+- Docker Integration
+- Add UI projects
